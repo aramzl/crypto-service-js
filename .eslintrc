@@ -1,0 +1,22 @@
+{
+  "env": {              // http://eslint.org/docs/user-guide/configuring.html#specifying-environments
+    "node": true,       // Node.js global variables and Node.js-specific rules
+    "mocha": true,      // Mocha global variables and Mocha-specific rules
+    "es6": true         // ES6 global variables and ES6-specific rules
+  },
+  "extends": "airbnb/base",
+  "rules": {
+    "func-names": 0,                            // http://eslint.org/docs/rules/func-names
+    "max-len": [1, 120, 4],                     // http://eslint.org/docs/rules/max-len
+    "space-before-function-paren": [2,          // http://eslint.org/docs/rules/space-before-function-paren.html
+      {
+        "anonymous": "never",
+        "named": "never"
+      }
+    ],
+    "no-param-reassign": [2, {"props": false}], // http://eslint.org/docs/rules/no-param-reassign.html
+    "consistent-return": 0,                     // http://eslint.org/docs/rules/consistent-return.html
+    "arrow-body-style": 0,                      // http://eslint.org/docs/rules/arrow-body-style.html
+    "prefer-rest-params": 0,                    // http://eslint.org/docs/rules/prefer-rest-params.html
+  }
+}
