@@ -22,6 +22,6 @@ The client needs the original AES key to decrypt the messages but the key-synchr
  const iv = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]; 
  const message = 'Hello world!!!!!';
  const encrypted = cryptoService.encryptTimeBased(key, iv, message);
- const decrypted = cryptoService.decrypt(key, iv, encrypted);
+ const decrypted = cryptoService.decryptTimeBased(key, iv, encrypted);
  console.log(decrypted); // prints Hello world!!!!!
  ```
