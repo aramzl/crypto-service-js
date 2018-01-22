@@ -2,9 +2,33 @@
 
 const aesjs = require('aes-js');
 const notp = require('notp');
+const crypto = require('crypto');
+const _ = require('lodash');
+
+function hexToBytes(hex) {
+  const bytes = [];
+  for (let c = 0, C = hex.length; c < C; c += 2) {
+    const byte = parseInt(hex.substr(c, 2), 16);
+    if (byte > 128) {
+      bytes.push(byte - 256);
+    } else {
+      bytes.push(byte);
+    }
+  }
+  return bytes;
+}
+
+function createDigestedKey(key) {
+  const hash = crypto.createHash('sha256')
+    .update(new Buffer(key))
+    .digest('hex');
+  const bytes = hexToBytes(hash);
+  return bytes;
+}
 
 function currentTimeBasedCode(key) {
-  const code = notp.totp.gen(key);
+  const bytes = createDigestedKey(key);
+  const code = notp.totp.gen(bytes);
   return code;
 }
 
@@ -23,20 +47,18 @@ function xor(one, two) {
   return newTwo;
 }
 
-function getInt64Bytes(integer) {
-  const bytes = [];
-  let i = 8;
-  let x = integer;
-  do {
-    bytes[--i] = x & (255);
-    x = x >> 8;
-  } while (i);
-  return bytes;
+function getStrBytes(str) {
+  function s(x) {
+    return x.charCodeAt(0);
+  }
+  return str.split('').map(s);
 }
 
 function generateTimeBasedKey(key) {
-  const newKey = xor(key, getInt64Bytes(currentTimeBasedCode(key)));
-  return newKey;
+  const code = currentTimeBasedCode(key);
+  const strBytes = getStrBytes(code);
+  const newKey = createDigestedKey(xor(createDigestedKey(key), strBytes));
+  return _.map(newKey, (byte) => (byte < 0 ? byte + 256 : byte));
 }
 
 const encrypt = function(key, iv, message) {
