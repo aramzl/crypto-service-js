@@ -5,31 +5,16 @@ const notp = require('notp');
 const crypto = require('crypto');
 const _ = require('lodash');
 
-function hexToBytes(hex) {
-  const bytes = [];
-  for (let c = 0, C = hex.length; c < C; c += 2) {
-    const byte = parseInt(hex.substr(c, 2), 16);
-    if (byte > 128) {
-      bytes.push(byte - 256);
-    } else {
-      bytes.push(byte);
-    }
-  }
-  return bytes;
-}
-
 function createDigestedKey(key) {
   const hash = crypto.createHash('sha256')
     .update(new Buffer(key))
     .digest('hex');
-  const bytes = hexToBytes(hash);
-  return bytes;
+  return aesjs.utils.hex.toBytes(hash);
 }
 
 function currentTimeBasedCode(key) {
   const bytes = createDigestedKey(key);
-  const code = notp.totp.gen(bytes);
-  return code;
+  return notp.totp.gen(bytes);
 }
 
 function xor(one, two) {
@@ -47,12 +32,12 @@ function xor(one, two) {
   return newTwo;
 }
 
-function getStrBytes(str) {
+const getStrBytes = function(str) {
   function s(x) {
     return x.charCodeAt(0);
   }
   return str.split('').map(s);
-}
+};
 
 function generateTimeBasedKey(key) {
   const code = currentTimeBasedCode(key);
@@ -64,17 +49,13 @@ function generateTimeBasedKey(key) {
 const encrypt = function(key, iv, message) {
   const textBytes = aesjs.utils.utf8.toBytes(message);
   const aesCbc = new aesjs.ModeOfOperation.cbc(key, iv); // eslint-disable-line
-  const encryptedBytes = aesCbc.encrypt(textBytes);
-  const encryptedHex = aesjs.utils.hex.fromBytes(encryptedBytes);
-  return encryptedHex;
+  return aesCbc.encrypt(textBytes);
 };
 
-const decrypt = function(key, iv, encryptedHex) {
-  const encryptedBytes = aesjs.utils.hex.toBytes(encryptedHex);
+const decrypt = function(key, iv, encryptedBytes) {
   const aesCbc = new aesjs.ModeOfOperation.cbc(key, iv); // eslint-disable-line
   const decryptedBytes = aesCbc.decrypt(encryptedBytes);
-  const decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
-  return decryptedText;
+  return aesjs.utils.utf8.fromBytes(decryptedBytes);
 };
 
 const encryptTimeBased = function(key, iv, message) {
@@ -87,8 +68,8 @@ const decryptTimeBased = function(key, iv, encryptedHex) {
   return decrypt(newKey, iv, encryptedHex);
 };
 
-
 module.exports.encrypt = encrypt;
 module.exports.decrypt = decrypt;
 module.exports.encryptTimeBased = encryptTimeBased;
 module.exports.decryptTimeBased = decryptTimeBased;
+module.exports.getStrBytes = getStrBytes;

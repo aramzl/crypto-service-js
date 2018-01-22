@@ -19,6 +19,7 @@ describe('crypto-service', () => {
     expect(decrypted).to.be.equal(message); // eslint-disable-line
     done();
   });
+
   it('encode/decode aes time based', function(done) {
     this.timeout(50000);
     const message = 'Hello world!!!!!';
@@ -33,6 +34,7 @@ describe('crypto-service', () => {
       expect(decrypted2).to.be.equal(message);
     }).then(() => done());
   });
+
   it('encode/decode failed after 30 sec aes time based', function(done) {
     this.timeout(50000);
     const message = 'Hello world!!!!!';
@@ -47,5 +49,17 @@ describe('crypto-service', () => {
       })
       .then(() => done())
       .catch((err) => done(err));
+  });
+
+  it('encodes/decodes with string key', function(done) {
+    this.timeout(50000);
+    const keyBytes = cryptoService.getStrBytes('mykey12345678901');
+    const ivBytes = cryptoService.getStrBytes('1234567890123456');
+    const message = 'Hello world!!!!!';
+    const encrypted = cryptoService.encryptTimeBased(keyBytes, ivBytes, message);
+    expect(encrypted).not.to.equal(message);
+    const decrypted = cryptoService.decryptTimeBased(keyBytes, ivBytes, encrypted);
+    expect(decrypted).to.be.equal(message);
+    done();
   });
 });
